@@ -25,3 +25,8 @@ The example in the video shows analysis performed on three images of the same WB
 4. Follow the instructions provided by the macro
 5. You can check the position of the ROIs on your image and rerun the analysis if they are not placed correctly
 6. Depending on the number of analyzed images and complexity of the experiment layout, quantitative data from .csv files can be processed using R or Excel.
+
+<p align="center"> <a href="https://youtu.be/zbv4CxE57vA"><img src="https://github.com/AlyonaMinina/GFP-cleavage-assay/blob/main/Images/GFP-cleavage%20assay%20preview.PNG" width = 480> </img></a></p>
+
+
+
