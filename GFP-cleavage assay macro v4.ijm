@@ -8,6 +8,8 @@
 	print(" ");
 	print("Welcome to the GFP-cleavage assay macro!");
 	print(" ");
+	print("Please note this macro will process .scn images for analysis (raw data files from Bio-Rad ChemiDoc");
+	print(" ");
 	print("Please select the folder with images for analysis");
 	print(" ");
 
@@ -28,7 +30,7 @@
 //Create a shorter list contiaiing .scn files only
 	scn_list = newArray(0);
 	for(s = 0; s < file_list.length; s++) {
-		if(endsWith(file_list[s], ".scn")) { //change to ".tif" when reruning on the results folder
+		if(endsWith(file_list[s], ".scn")) { 
 			scn_list = Array.concat(scn_list, file_list[s]);
 		}
 	}
@@ -66,7 +68,7 @@
 	//Place the ROIs for each band
 		run("ROI Manager...");
 		roiManager("reset");
-		run("Invert"); //use this for .scn files, comment out for tif files
+		run("Invert"); 
 			
 	//Wait for the user to crop/rotate the image and save the result
 		waitForUser("Please rotate the image to place bands horizontally\n\nUse 0 degrees if no rotation is needed.\n\nHit ok to proceed to rotation");
@@ -105,7 +107,7 @@
 			roiManager("Show All with labels");
 			roiManager("Save", output_dir + Assay_title +"_ROIs.zip");
 			
-			//measure and save IntDen
+			//measure and save integrated density for each ROI
 			run("Invert");
 			for ( r=0; r<n; r++ ) {
 					run("Clear Results");
@@ -124,7 +126,7 @@
 					Table.set("RawIntDen", current_last_row, RawIntDen, "Assay Results");
 					}
 					
-			//create a column for Integrated density without background
+			//create a column for Raw Integrated Density without background
 				current_last_row = Table.size("Assay Results");
 				Background_for_GFPATG8 = Table.get("RawIntDen", current_last_row-2, "Assay Results");
 				Background_for_free_GFP = Table.get("RawIntDen", current_last_row-1, "Assay Results");
@@ -142,7 +144,7 @@
 						 Table.set("RawIntDen_without_background", row, IntDen_without_background, "Assay Results");
 				}
 				
-			//create a column with  sample numbers
+			//create a column with sample numbers
 				current_last_row = Table.size("Assay Results");
 				for (row = 0; row < current_last_row; row++) {
 					Band_name =Table.getString("Band name", row, "Assay Results"); 
@@ -155,7 +157,7 @@
 			Table.set("Sample number", current_last_row-2, "","Assay Results"); //clean up the values for the two background rows
 			Table.set("Sample number", current_last_row-1, "","Assay Results");
 			
-		//create a column with  sample numbers calculation for the free GFP, expressed as % of all gFP detected in the sample
+		//create a column with calculation for the free GFP, expressed as % of all gFP detected in the sample
 				current_last_row = Table.size("Assay Results");
 				for (row = 1; row < current_last_row; row++) {
 					Total_GFP = (Table.get("RawIntDen_without_background", row-1, "Assay Results")) + (Table.get("RawIntDen_without_background", row, "Assay Results"));
@@ -165,7 +167,7 @@
 					row = row+1;
 				 }
 				 
-		//clean up the table  from extra 0 and NaN values
+		//clean up the table from non-relevant 0 and NaN values
 		current_last_row = Table.size("Assay Results");
 				for (row = 0; row < current_last_row; row++) {
 					Table.set("Free GFP as % of total GFP detected in the sample", row, "", "Assay Results");
@@ -198,6 +200,9 @@
 //Print the final message
    print(" ");
    print("Done!");
+   print(" ");
    print("Your quantification results are saved in the folder\n\n " + output_dir);
    print(" ");
-   print("Alyona Minina. 2024");	
+   print("When describing your analysis, please reference the repository\n\nhttps://github.com/AlyonaMinina/GFP-cleavage-assay\n\n Alyona Minina. 2024");	
+   selectWindow("Log");
+   saveAs("Text",  output_dir + "Analysis summary.txt");
