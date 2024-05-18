@@ -6,9 +6,7 @@
 	
 //Print the greeting
 	print(" ");
-	print("Welcome to the GFP-cleavage assay macro!");
-	print(" ");
-	print("Please note this macro will process .scn images for analysis (raw data files from Bio-Rad ChemiDoc");
+	print("Welcome to the NACA ImageJ macro (N-terminal ATG8 cleavage assay also known as the GFP-cleavage assay)!");
 	print(" ");
 	print("Please select the folder with images for analysis");
 	print(" ");
@@ -16,7 +14,7 @@
 //Find the original directory and create a new one for quantification results
 	original_dir = getDirectory("Select a directory");
 	original_folder_name = File.getName(original_dir);
-	output_dir = original_dir +"Densitometry results" + File.separator;
+	output_dir = original_dir +"Results" + File.separator;
 	File.makeDirectory(output_dir);
 
 //Create the table for all assays results
@@ -30,7 +28,7 @@
 //Create a shorter list contiaiing .scn files only
 	scn_list = newArray(0);
 	for(s = 0; s < file_list.length; s++) {
-		if(endsWith(file_list[s], ".scn")) { 
+		if(endsWith(file_list[s], ".scn")) {
 			scn_list = Array.concat(scn_list, file_list[s]);
 		}
 	}
@@ -66,9 +64,9 @@
 	
 
 	//Place the ROIs for each band
+		run("Invert");
 		run("ROI Manager...");
 		roiManager("reset");
-		run("Invert"); 
 			
 	//Wait for the user to crop/rotate the image and save the result
 		waitForUser("Please rotate the image to place bands horizontally\n\nUse 0 degrees if no rotation is needed.\n\nHit ok to proceed to rotation");
@@ -83,31 +81,30 @@
 		roiManager("Show All with labels");
 		
 	//Wait for the user to adjust the ROIs size and position
-		waitForUser("Add all ROIs to ROI manager, then hit OK.\n\n1. For each lane select first the GFP-fusion band and then the free GFP band.\n\n2. Add two ROIs selecting background for GFP-fusion and free GFP\n\n3. NB! Keep ROI size the same for all selections!\n\n3. Hit ok, when done! "); 
+		waitForUser("Add all ROIs to ROI manager, then hit OK.\n\n1. For each lane select first the Tag-ATG8-fusion band and then the free Tag band.\n\n2. Add two ROIs selecting background for TAg-ATG8-fusion and free Tag\n\n3. NB! Keep ROI size the same for all selections!\n\n3. Hit ok, when done! "); 
 	
 	//Rename the ROIs and save them
-			
 			n = roiManager("count");
 			x = 1;
 			for ( r=0; r<n; r++ ) {
 				    roiManager("Select", r);
 				    odd = r % 2;		
 					if (!odd) {
-						roiManager("Rename", "GFP-ATG8 sample " + x);
+						roiManager("Rename", "Tag-ATG8 sample " + x);
 						} else {
-						roiManager("Rename", "GFP sample " + x-1);
+						roiManager("Rename", "Free Tag sample " + x-1);
 						x=x-1;
 						}
 						x=x+1;
 					}
 			roiManager("Select", n-2);
-			roiManager("Rename", "Background signal for GFP-ATG8 bands");
+			roiManager("Rename", "Background signal for Tag-ATG8 bands");
 			roiManager("Select", n-1);
-			roiManager("Rename", "Background signal for free GFP bands");
+			roiManager("Rename", "Background signal for free Tag bands");
 			roiManager("Show All with labels");
 			roiManager("Save", output_dir + Assay_title +"_ROIs.zip");
 			
-			//measure and save integrated density for each ROI
+			//measure and save IntDen
 			run("Invert");
 			for ( r=0; r<n; r++ ) {
 					run("Clear Results");
@@ -126,25 +123,54 @@
 					Table.set("RawIntDen", current_last_row, RawIntDen, "Assay Results");
 					}
 					
-			//create a column for Raw Integrated Density without background
-				current_last_row = Table.size("Assay Results");
-				Background_for_GFPATG8 = Table.get("RawIntDen", current_last_row-2, "Assay Results");
-				Background_for_free_GFP = Table.get("RawIntDen", current_last_row-1, "Assay Results");
-								
-				for (row = 0; row < current_last_row; row++) {
-					Band_name =Table.getString("Band name", row, "Assay Results"); 
-					if(indexOf(Band_name, "ATG8")>0) {			
-		   			     Current_RawIntDen = Table.get("RawIntDen", row, "Assay Results");
-						 IntDen_without_background = Current_RawIntDen - Background_for_GFPATG8;
-						 } else {			
-		   			     Current_RawIntDen = Table.get("RawIntDen", row, "Assay Results");
-						 IntDen_without_background = Current_RawIntDen - Background_for_free_GFP;
-						 	} 
-						 
-						 Table.set("RawIntDen_without_background", row, IntDen_without_background, "Assay Results");
-				}
+			//create a column for Integrated density without background
+			 current_last_row = Table.size("Assay Results"); // Get the number of rows in the table
+		     current_assay_rows = newArray(current_last_row); // Create an array to store rows belonging to the currently processed image    
+		    // Iterate through the table to find rows belonging to the currently processed image
+		    current_row_count = 0; // Initialize a counter for the current assay rows
+		    for (row = 0; row < current_last_row; row++) {
+		        Assay_subset = Table.getString("Assay name", row, "Assay Results"); 
+		        if (Assay_subset == Assay_title) {
+		            current_assay_rows[current_row_count] = row; // Assign the current row index to the current assay rows array
+		            current_row_count++; // Increment the counter for the next row index
+		        }
+		    }
+           Array.trim(current_assay_rows, current_row_count); // Trim the array to remove any unused elements
+
+		   // Fetch background values for the currently processed images
+		   Background_for_TagATG8 = Table.get("RawIntDen", current_last_row-2, "Assay Results");
+		   Background_for_free_Tag = Table.get("RawIntDen", current_last_row-1, "Assay Results");
+    
+    // Process each row belonging to the currently processed image
+    for (r = 0; r < current_row_count; r++) {
+        row = current_assay_rows[r];
+        Band_name = Table.getString("Band name", row, "Assay Results"); 
+        if(indexOf(Band_name, "ATG8")>0) {			
+	      Current_RawIntDen = Table.get("RawIntDen", row, "Assay Results");
+	      IntDen_without_background = Current_RawIntDen - Background_for_TagATG8;
+	 } else {			
+	        Current_RawIntDen = Table.get("RawIntDen", row, "Assay Results");
+	        IntDen_without_background = Current_RawIntDen - Background_for_free_Tag;
+	 } 
+        Table.set("RawIntDen_without_background", row, IntDen_without_background, "Assay Results");
+    }
+
+    // Create a column with sample numbers
+    current_last_row = Table.size("Assay Results");
+    for (row = 0; row < current_last_row; row++) {
+        Band_name = Table.getString("Band name", row, "Assay Results"); 
+        Sn_extraction = lastIndexOf(Band_name, "sample");
+        if (Sn_extraction >= 0) {                   
+            Sample_number = substring(Band_name, Sn_extraction);
+            Table.set("Sample number", row, Sample_number, "Assay Results");
+        }
+    }
+    Table.set("Sample number", current_last_row-3, "","Assay Results"); // Clean up the values for the two background rows
+    Table.set("Sample number", current_last_row-2, "","Assay Results");
+    Table.set("Sample number", current_last_row-1, "","Assay Results");
+    
 				
-			//create a column with sample numbers
+			//create a column with  sample numbers
 				current_last_row = Table.size("Assay Results");
 				for (row = 0; row < current_last_row; row++) {
 					Band_name =Table.getString("Band name", row, "Assay Results"); 
@@ -157,31 +183,31 @@
 			Table.set("Sample number", current_last_row-2, "","Assay Results"); //clean up the values for the two background rows
 			Table.set("Sample number", current_last_row-1, "","Assay Results");
 			
-		//create a column with calculation for the free GFP, expressed as % of all gFP detected in the sample
+		//create a column with  sample numbers calculation for the free Tag, expressed as % of all Tag detected in the sample
 				current_last_row = Table.size("Assay Results");
 				for (row = 1; row < current_last_row; row++) {
-					Total_GFP = (Table.get("RawIntDen_without_background", row-1, "Assay Results")) + (Table.get("RawIntDen_without_background", row, "Assay Results"));
-					Free_GFP = Table.get("RawIntDen_without_background", row, "Assay Results");
-					Free_GFP_percent = 100*Free_GFP/Total_GFP;
-					Table.set("Free GFP as % of total GFP detected in the sample", row, Free_GFP_percent, "Assay Results");
+					Total_Tag = (Table.get("RawIntDen_without_background", row-1, "Assay Results")) + (Table.get("RawIntDen_without_background", row, "Assay Results"));
+					Free_Tag = Table.get("RawIntDen_without_background", row, "Assay Results");
+					Free_Tag_percent = 100*Free_Tag/Total_Tag;
+					Table.set("Free Tag as % of total Tag detected in the sample", row, Free_Tag_percent, "Assay Results");
 					row = row+1;
 				 }
 				 
-		//clean up the table from non-relevant 0 and NaN values
+		//clean up the table  from extra 0 and NaN values
 		current_last_row = Table.size("Assay Results");
 				for (row = 0; row < current_last_row; row++) {
-					Table.set("Free GFP as % of total GFP detected in the sample", row, "", "Assay Results");
+					Table.set("Free Tag as % of total Tag detected in the sample", row, "", "Assay Results");
 					row = row+1;
 				}
-		Table.set("Free GFP as % of total GFP detected in the sample", current_last_row-1, "", "Assay Results");
-				 
+		Table.set("Free Tag as % of total Tag detected in the sample", current_last_row-1, "", "Assay Results");
+		}		 
 				
 			//Save the quantification results into a .csv table file
 			selectWindow("Results");
 			run("Close");
-			Table.save(output_dir + "Results " + Assay_title+ ".csv");
+			Table.save(output_dir + "NACA ImageJ macro results" + ".csv");
 			run("Close All");
-		}
+		
 
 //A feeble attempt to close those pesky ImageJ windows		
 	run("Close All");
@@ -199,10 +225,8 @@
  
 //Print the final message
    print(" ");
-   print("Done!");
+   print("All Done!");
+   print("Your quantification results are saved in the folder " + output_dir);
+   print(" "); 
    print(" ");
-   print("Your quantification results are saved in the folder\n\n " + output_dir);
-   print(" ");
-   print("When describing your analysis, please reference the repository\n\nhttps://github.com/AlyonaMinina/GFP-cleavage-assay\n\n Alyona Minina. 2024");	
-   selectWindow("Log");
-   saveAs("Text",  output_dir + "Analysis summary.txt");
+   print("Alyona Minina. 2024");	
