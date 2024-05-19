@@ -8,51 +8,68 @@
 	print(" ");
 	print("Welcome to the NACA ImageJ macro (N-terminal ATG8 cleavage assay also known as the GFP-cleavage assay)!");
 	print(" ");
-	print("Please select the folder with images for analysis");
-	print(" ");
-
-//Find the original directory and create a new one for quantification results
-	original_dir = getDirectory("Select a directory");
-	original_folder_name = File.getName(original_dir);
-	output_dir = original_dir +"Results" + File.separator;
-	File.makeDirectory(output_dir);
-
-//Create the table for all assays results
-	Table.create("Assay Results");
 	
+// Ask the user what file format do they want to process
+Dialog.create("Select the file format ");
+Dialog.addChoice("Please select the image file format you want to process and hit ok to proceed to selecting the folder with images for analysis:", newArray(".scn", ".tif"));
+Dialog.show();
+File_format = Dialog.getChoice();
 
+
+// Find the original directory and create a new one for quantification results
+original_dir = getDirectory("Select a directory");
+original_folder_name = File.getName(original_dir);
+output_dir = original_dir + "Results" + File.separator;
+File.makeDirectory(output_dir);
+
+// Create the table for all assays results
+Table.create("Assay Results");
+
+ 
 // Get a list of all the files in the directory
-	file_list = getFileList(original_dir);
+file_list = getFileList(original_dir);
 
-
-//Create a shorter list contiaiing .scn files only
-	scn_list = newArray(0);
+// Create a shorter list containing list of image files with only the selected format
+if(File_format == ".scn"){
+	image_list = newArray(0);
 	for(s = 0; s < file_list.length; s++) {
-		if(endsWith(file_list[s], ".scn")) {
-			scn_list = Array.concat(scn_list, file_list[s]);
-		}
+	    if(endsWith(file_list[s], ".scn")) {
+	        image_list = Array.concat(image_list, file_list[s]);
+	    }
 	}
-	
-//inform the user about how many images will be analyzed from the selected folder
-	print(scn_list.length + " images were detected for analysis");
-	print("");
 
-//Loop analysis through the list of .scn files
-	for (i = 0; i < scn_list.length; i++){
-		path = original_dir + scn_list[i];
-		run("Bio-Formats Windowless Importer",  "open=path");    
-	
-	//Get the image file title and remove the extension from it    
-		title = getTitle();
-		a = lengthOf(title);
-		b = a-4;
-		short_name = substring(title, 0, b);
-		selectWindow(title);
-				
-	//Print for the user what image is being processed
-		print ("Processing image " + i+1 + " out of " + scn_list.length + ":");
-		print(title);
-		print("");
+} else{
+	image_list = newArray(0);
+	for(s = 0; s < file_list.length; s++) {
+	    if(endsWith(file_list[s], ".tif")) {
+	        image_list = Array.concat(image_list, file_list[s]);
+	    }
+	}
+
+
+// Inform the user about how many images will be analyzed from the selected folder
+print(image_list.length + " images were detected for analysis");
+print("");
+
+// Loop analysis through the list of image files
+for (i = 0; i < image_list.length; i++){
+    path = original_dir + image_list[i];
+    run("Bio-Formats Windowless Importer", "open=path");    
+
+    // Get the image file title and remove the extension from it    
+    title = getTitle();
+    a = lengthOf(title);
+    b = a-4;
+    short_name = substring(title, 0, b);
+    selectWindow(title);
+
+    // Print for the user what image is being processed
+    print ("Processing image " + (i+1) + " out of " + image_list.length + ":");
+    print(title);
+    print("");
+		
+
+
 		
 	//Ask user how to call this quantification
 	Assay_title = "AZD";
@@ -64,9 +81,11 @@
 	
 
 	//Place the ROIs for each band
-		run("Invert");
 		run("ROI Manager...");
 		roiManager("reset");
+		   if(File_format == ".scn"){
+   			 run("Invert");
+   	    	}
 			
 	//Wait for the user to crop/rotate the image and save the result
 		waitForUser("Please rotate the image to place bands horizontally\n\nUse 0 degrees if no rotation is needed.\n\nHit ok to proceed to rotation");
