@@ -218,7 +218,8 @@ for (i = 0; i < image_list.length; i++){
 					Table.set("Free Tag as % of total Tag detected in the sample", row, "", "Assay Results");
 					row = row+1;
 				}
-		Table.set("Free Tag as % of total Tag detected in the sample", current_last_row-1, "", "Assay Results");
+				Table.set("Free Tag as % of total Tag detected in the sample", current_last_row-2, "", "Assay Results"); //clean out unnecessary 0
+				Table.set("Free Tag as % of total Tag detected in the sample", current_last_row-1, "", "Assay Results");
 		}		 
 				
 			//Save the quantification results into a .csv table file
