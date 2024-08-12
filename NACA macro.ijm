@@ -101,7 +101,7 @@ for (i = 0; i < image_list.length; i++){
 		roiManager("Show All with labels");
 		
 	//Wait for the user to adjust the ROIs size and position
-		waitForUser("Add all ROIs to ROI manager, then hit OK.\n\n1. For each lane select first the Tag-ATG8-fusion band and then the free Tag band.\n\n2. Add two ROIs selecting background for TAg-ATG8-fusion and free Tag\n\n3. NB! Keep ROI size the same for all selections!\n\n3. Hit ok, when done! "); 
+		waitForUser("Add all ROIs to ROI manager, then hit OK.\n\n1. For each lane select first the Tag-ATG8-fusion band and then the free Tag band.\n\n2. Add two ROIs selecting background for Tag-ATG8-fusion and free Tag\n\n3. NB! Keep ROI size the same for all selections!\n\n3. Hit ok, when done! "); 
 	
 	//Rename the ROIs and save them
 			n = roiManager("count");
