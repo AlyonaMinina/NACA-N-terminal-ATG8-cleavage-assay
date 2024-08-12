@@ -30,21 +30,11 @@ Table.create("Assay Results");
 file_list = getFileList(original_dir);
 
 // Create a shorter list containing list of image files with only the selected format
-if(File_format == ".scn"){
-	image_list = newArray(0);
-	for(s = 0; s < file_list.length; s++) {
-	    if(endsWith(file_list[s], ".scn")) {
-	        image_list = Array.concat(image_list, file_list[s]);
-	    }
-	}
-
-} else{
-	image_list = newArray(0);
-	for(s = 0; s < file_list.length; s++) {
-	    if(endsWith(file_list[s], ".tif")) {
-	        image_list = Array.concat(image_list, file_list[s]);
-	    }
-	}
+image_list = newArray(0);
+for(s = 0; s < file_list.length; s++) {
+    if(endsWith(file_list[s], File_format)) {
+        image_list = Array.concat(image_list, file_list[s]);
+        }
 }
 
 
