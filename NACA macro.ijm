@@ -45,6 +45,7 @@ if(File_format == ".scn"){
 	        image_list = Array.concat(image_list, file_list[s]);
 	    }
 	}
+}
 
 
 // Inform the user about how many images will be analyzed from the selected folder
