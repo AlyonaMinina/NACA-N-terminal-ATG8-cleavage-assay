@@ -1,5 +1,11 @@
 # NACA, N-terminal ATG8 cleavage assay 
 ## (In the standard layout, this assay is commonly known as the GFP-cleavage assay. However it can be performed on ATG8 harboring other detectable N-terminal tags)
+
+
+
+[![DOI](https://zenodo.org/badge/799311153.svg)](https://doi.org/10.5281/zenodo.14508440)
+
+
 ImageJ macro for densitometric analysis of Western blots for GFP-cleavage assay. 
 <br>
  
