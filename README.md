@@ -2,6 +2,13 @@
 ## (In the standard layout, this assay is commonly known as the GFP-cleavage assay. However it can be performed on ATG8 harboring other detectable N-terminal tags)
 
 
+</br>
+</br>
+ 
+<b>!! Please reference the study [(Zou et al., 2025)](https://www.nature.com/articles/s41467-024-55754-1) when using these scipts!! </b>
+  
+</br>
+
 ImageJ macro for densitometric analysis of Western blots for GFP-cleavage assay. 
 <br>
  
